@@ -19,14 +19,14 @@ def main():
     if submit:
         data = {
             'Kode Wilayah': Region,
-            'tanggal Relatif': Date,
+            'Tanggal Relatif': Date,
         }
         data = pd.Series(data).to_frame(name=0).T
-        data['Region'] = data['Region'].replace({'Jabodetabek': 0, 'Non Jabodetabek (Jawa)': 2, 'Jawa (Jabodetabek+Non Jabodetabek)': 1, 'Sumatera': 3})
+        data['Kode Wilayah'] = data['Kode Wilayah'].replace({'Jabodetabek': 0, 'Non Jabodetabek (Jawa)': 2, 'Jawa (Jabodetabek+Non Jabodetabek)': 1, 'Sumatera': 3})
 
         # Convert Tanggal column to datetime and calculate the difference from the reference date
         reference_date = pd.to_datetime('2006-01-01')
-        data['Date'] = pd.to_datetime(data['Date']).sub(reference_date).dt.days
+        data['Tanggal Relatif'] = pd.to_datetime(data['Tanggal Relatif']).sub(reference_date).dt.days
 
         # Load the model from the pickle file
         with open('model.pkl', 'rb') as f:
