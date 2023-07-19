@@ -1,6 +1,8 @@
 import pickle
 import streamlit as st
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 title = 'Predict Amount of Commuter Passenger 🚉'
 subtitle = 'Predict Amount of Commuter Passenger using machine learning 🚄🚄 '
@@ -12,16 +14,18 @@ def main():
 
     form = st.form("Data Input")
     Region = form.selectbox('Region', ['Jabodetabek', 'Non Jabodetabek (Jawa)', 'Jawa (Jabodetabek+Non Jabodetabek)', 'Sumatera'])
-    Date = form.date_input('Date')
+    start_date = form.date_input('Start Date')
+    end_date = form.date_input('End Date')
 
     submit = form.form_submit_button("Predict")  # Add a submit button
 
     if submit:
         data = {
             'Kode Wilayah': Region,
-            'Tanggal Relatif': Date,
+            'Tanggal Relatif': pd.date_range(start=start_date, end=end_date).to_list()
         }
-        data = pd.Series(data).to_frame(name=0).T
+        data = pd.DataFrame(data)
+
         data['Kode Wilayah'] = data['Kode Wilayah'].replace({'Jabodetabek': 0, 'Non Jabodetabek (Jawa)': 2, 'Jawa (Jabodetabek+Non Jabodetabek)': 1, 'Sumatera': 3})
 
         # Convert Tanggal column to datetime and calculate the difference from the reference date
@@ -33,9 +37,20 @@ def main():
             model = pickle.load(f)
         
         # Make prediction using the loaded model
-        prediction = model.predict(data)[0]
-        rounded_prediction = round(prediction)  # Round the prediction to the nearest integer
-        st.success('Your predicted amount of commuter passenger: ' + str(rounded_prediction))
+        predictions = model.predict(data)
+
+        # Create a DataFrame to store the results
+        results = pd.DataFrame({'Date': data['Tanggal Relatif'], 'Predicted Passenger': predictions})
+
+        # Visualize the results using matplotlib
+        plt.plot(results['Date'], results['Predicted Passenger'])
+        plt.xlabel('Date')
+        plt.ylabel('Predicted Passenger')
+        plt.title('Predicted Amount of Commuter Passenger over Time')
+        st.pyplot(plt)
+
+        # Optionally, you can also show the raw data in a table
+        st.dataframe(results)
 
 if __name__ == '__main__':
     main()
